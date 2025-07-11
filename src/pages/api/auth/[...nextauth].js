@@ -10,4 +10,16 @@ export default NextAuth({
         "https://accounts.spotify.com/authorize?scope=user-top-read",
     }),
   ],
+  callbacks: {
+    async jwt({ token, account }) {
+      if (account) {
+        token.accessToken = account.access_token;
+      }
+      return token;
+    },
+    async session({ session, token }) {
+      session.accessToken = token.accessToken;
+      return session;
+    },
+  },
 });
