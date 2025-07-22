@@ -4,24 +4,36 @@ import { useEffect, useState } from "react";
 export default function Home() {
   const { data: session } = useSession();
   const [tracks, setTracks] = useState([]);
-  const [timeRange, setTimeRange] = useState("short_term"); // default
+  const [timeRange, setTimeRange] = useState("short_term");
   const [loading, setLoading] = useState(false);
 
-  const fetchTopTracks = async () => {
-    if (!session) return;
+const fetchTopTracks = async () => {
+  if (!session) return;
 
+  try {
     setLoading(true);
     const res = await fetch(`/api/top-tracks?time_range=${timeRange}`);
     const data = await res.json();
-    setTracks(data.tracks);
+
+    if (res.ok) {
+      setTracks(data.tracks || []);
+    } else {
+      console.error("Error fetching tracks:", data);
+      setTracks([]);
+    }
+  } catch (error) {
+    console.error("Error:", error);
+    setTracks([]);
+  } finally {
     setLoading(false);
-  };
+  }
+};
 
   useEffect(() => {
     if (session) {
       fetchTopTracks();
     }
-  }, [session, timeRange]); // refetch when time range changes
+  }, [session, timeRange]);
 
   const handleTimeChange = (e) => {
     setTimeRange(e.target.value);
